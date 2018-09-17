@@ -875,7 +875,14 @@ malloc_conf_init(void) {
 	const char *opts, *k, *v;
 	size_t klen, vlen;
 
+#if defined(__ANDROID__)
+	/* For Android, do not look at files nor environment variables for
+	 * config data.
+	 */
+	for (i = 0; i < 2; i++) {
+#else
 	for (i = 0; i < 4; i++) {
+#endif
 		/* Get runtime configuration. */
 		switch (i) {
 		case 0:
@@ -1346,7 +1353,12 @@ static bool
 malloc_init_hard_recursible(void) {
 	malloc_init_state = malloc_init_recursible;
 
+#if defined(__ANDROID__) && defined(ANDROID_NUM_ARENAS)
+	/* Hardcode since this value won't be used. */ 
+	ncpus = 2;
+#else
 	ncpus = malloc_ncpus();
+#endif
 
 #if (defined(JEMALLOC_HAVE_PTHREAD_ATFORK) && !defined(JEMALLOC_MUTEX_INIT_CB) \
     && !defined(JEMALLOC_ZONE) && !defined(_WIN32) && \
@@ -1371,6 +1383,9 @@ malloc_init_hard_recursible(void) {
 
 static unsigned
 malloc_narenas_default(void) {
+#if defined(ANDROID_NUM_ARENAS)
+	return ANDROID_NUM_ARENAS;
+#else
 	assert(ncpus > 0);
 	/*
 	 * For SMP systems, create more than one arena per CPU by
@@ -1381,6 +1396,7 @@ malloc_narenas_default(void) {
 	} else {
 		return 1;
 	}
+#endif
 }
 
 static percpu_arena_mode_t
@@ -3324,3 +3340,8 @@ jemalloc_postfork_child(void) {
 }
 
 /******************************************************************************/
+
+#if defined(__ANDROID__) && !defined(JEMALLOC_JET)
+#include "android_je_iterate.c"
+#include "android_je_mallinfo.c"
+#endif

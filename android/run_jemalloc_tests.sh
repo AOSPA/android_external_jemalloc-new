@@ -1,4 +1,4 @@
-#!/system/bin/sh
+#!/bin/sh
 #
 # Copyright (C) 2014 The Android Open Source Project
 #
@@ -94,7 +94,7 @@ STRESS_TESTS=( \
   "microbench" \
 )
 
-TEST_DIRECTORIES=( "/data/nativetest" "/data/nativetest64" )
+TEST_DIRECTORIES=( "nativetest" "nativetest64" )
 FAILING_TESTS=()
 
 function run_tests () {
@@ -120,8 +120,17 @@ function run_tests () {
   fi
 }
 
+if [[ "" == "$1" ]]; then
+  directory="/data"
+else
+  directory=$1;
+fi
+
+echo "Looking in $directory";
+
 EXIT_CODE=0
 for test_dir in ${TEST_DIRECTORIES[@]}; do
+  test_dir="${directory}/${test_dir}"
   if [[ -d "${test_dir}" ]]; then
     run_tests "unit" "${test_dir}/${UNIT_TEST_DIR}" ${UNIT_TESTS[@]}
     run_tests "integration" "${test_dir}/${INTEGRATION_TEST_DIR}" ${INTEGRATION_TESTS[@]}
