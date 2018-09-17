@@ -27,8 +27,12 @@ common_cflags = [
     "-fvisibility=hidden",
     "-O3",
     "-funroll-loops",
+
+    // The following flags are for avoiding errors when compiling.
     "-Wno-unused-parameter",
+    "-Wno-unused-function",
     "-Wno-missing-field-initializers",
+
     "-U_FORTIFY_SOURCE",
 ]
 
@@ -37,10 +41,66 @@ common_c_local_includes = [
     "include",
 ]
 
+// These parameters change the way jemalloc works.
+//   ANDROID_NUM_ARENAS=XX
+//     The total number of arenas to create.
+//   ANDROID_TCACHE_NSLOTS_SMALL_MIN=XX
+//     The minimum number of small slots held in the tcache. This must be
+//     at least 1.
+//   ANDROID_TCACHE_NSLOTS_SMALL_MAX=XX
+//     The number of small slots held in the tcache. The higher this number
+//     is, the higher amount of PSS consumed. If this number is set too low
+//     then small allocations will take longer to complete.
+//   ANDROID_TCACHE_NSLOTS_LARGE=XX
+//     The number of large slots held in the tcache. The higher this number
+//     is, the higher amount of PSS consumed. If this number is set too low
+//     then large allocations will take longer to complete.
+//   ANDROID_LG_TCACHE_MAXCLASS_DEFAULT=XX
+//     1 << XX is the maximum sized allocation that will be in the tcache.
+
+android_common_cflags = [
+    "-DANDROID_TCACHE_NSLOTS_SMALL_MIN=1",
+    "-DANDROID_LG_TCACHE_MAXCLASS_DEFAULT=16",
+
+    // Default some parameters to small values to minimize PSS.
+    // These parameters will be overridden by android_product_variables
+    // for non-svelte configs.
+    "-DANDROID_NUM_ARENAS=1",
+    "-DANDROID_TCACHE_NSLOTS_SMALL_MAX=1",
+    "-DANDROID_TCACHE_NSLOTS_LARGE=1",
+]
+
+android_product_variables = {
+    // Only enable the tcache on non-svelte configurations, to save PSS.
+    malloc_not_svelte: {
+        cflags: [
+            "-UANDROID_NUM_ARENAS",
+            "-DANDROID_NUM_ARENAS=2",
+
+            "-UANDROID_TCACHE_NSLOTS_SMALL_MAX",
+            "-DANDROID_TCACHE_NSLOTS_SMALL_MAX=8",
+
+            "-UANDROID_TCACHE_NSLOTS_LARGE",
+            "-DANDROID_TCACHE_NSLOTS_LARGE=16",
+        ],
+    },
+}
+
 cc_defaults {
     name: "jemalloc5_defaults",
     defaults: ["linux_bionic_supported"],
+    host_supported: true,
     cflags: common_cflags,
+
+    target: {
+        android: {
+            cflags: android_common_cflags,
+            product_variables: android_product_variables,
+        },
+        linux_glibc: {
+            enabled: true,
+        },
+    },
 
     local_include_dirs: common_c_local_includes,
     stl: "none",
@@ -82,13 +142,21 @@ lib_src_files = [
 //-----------------------------------------------------------------------
 // jemalloc static library
 //-----------------------------------------------------------------------
-cc_library_static {
+cc_library {
     name: "libjemalloc5",
     recovery_available: true,
 
     defaults: ["jemalloc5_defaults"],
 
     srcs: lib_src_files,
+
+    target: {
+        android: {
+            shared: {
+                enabled: false,
+            },
+        },
+    },
 }
 
 //-----------------------------------------------------------------------
@@ -100,7 +168,6 @@ cc_library_static {
     defaults: ["jemalloc5_defaults"],
 
     cflags: [
-        "-U_FORTIFY_SOURCE",
         "-DJEMALLOC_JET",
     ],
 
@@ -129,7 +196,6 @@ cc_library_static {
     defaults: ["jemalloc5_defaults"],
 
     cflags: [
-        "-U_FORTIFY_SOURCE",
         "-DJEMALLOC_UNIT_TEST",
     ],
 
@@ -203,10 +269,11 @@ unit_tests = [
 cc_test {
     name: "jemalloc5_unittests",
 
+    defaults: ["jemalloc5_defaults"],
+
     gtest: false,
 
     cflags: common_cflags + [
-        "-U_FORTIFY_SOURCE",
         "-DJEMALLOC_UNIT_TEST",
     ],
 
@@ -219,6 +286,16 @@ cc_test {
     static_libs: ["libjemalloc5_unittest"],
 
     test_per_src: true,
+
+    target: {
+        linux_glibc: {
+            enabled: true,
+            // The sanitizer does not work for these tests on the host.
+            sanitize: {
+                never: true,
+            },
+        },
+    },
 }
 
 //-----------------------------------------------------------------------
@@ -262,10 +339,11 @@ integration_tests = [
 cc_test {
     name: "jemalloc5_integrationtests",
 
+    defaults: ["jemalloc5_defaults"],
+
     gtest: false,
 
     cflags: common_cflags + [
-        "-U_FORTIFY_SOURCE",
         "-DJEMALLOC_INTEGRATION_TEST",
     ],
 
@@ -278,6 +356,18 @@ cc_test {
     static_libs: ["libjemalloc5_integrationtest"],
 
     test_per_src: true,
+
+    target: {
+        linux_glibc: {
+            // The sanitizer does not work for these tests on the host.
+            sanitize: {
+                never: true,
+            },
+        },
+    },
+
+    // Needed for basic.cpp test.
+    stl: "libc++_static",
 }
 
 //-----------------------------------------------------------------------
@@ -289,7 +379,6 @@ cc_library_static {
     defaults: ["jemalloc5_defaults"],
 
     cflags: [
-        "-U_FORTIFY_SOURCE",
         "-DJEMALLOC_STRESS_TEST",
         "-DJEMALLOC_STRESS_TESTLIB",
     ],
@@ -313,10 +402,11 @@ stress_tests = [
 cc_test {
     name: "jemalloc5_stresstests",
 
+    defaults: ["jemalloc5_defaults"],
+
     gtest: false,
 
     cflags: common_cflags + [
-        "-U_FORTIFY_SOURCE",
         "-DJEMALLOC_STRESS_TEST",
     ],
 
@@ -333,4 +423,13 @@ cc_test {
     ],
 
     test_per_src: true,
+
+    target: {
+        linux_glibc: {
+            // The sanitizer does not work for these tests on the host.
+            sanitize: {
+                never: true,
+            },
+        },
+    },
 }
