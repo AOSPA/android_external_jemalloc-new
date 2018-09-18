@@ -42,7 +42,15 @@ large_palloc(tsdn_t *tsdn, arena_t *arena, size_t usize, size_t alignment,
 	 */
 	is_zeroed = zero;
 	if (likely(!tsdn_null(tsdn))) {
+#if defined(__ANDROID__) && !defined(__LP64__)
+		/* On 32 bit systems, using a per arena cache can exhaust
+		 * virtual address space. Force all huge allocations to
+		 * always take place in the first arena.
+		 */
+		arena = arena_get(tsdn, 0, false);
+#else
 		arena = arena_choose(tsdn_tsd(tsdn), arena);
+#endif
 	}
 	if (unlikely(arena == NULL) || (extent = arena_extent_alloc_large(tsdn,
 	    arena, usize, alignment, &is_zeroed)) == NULL) {
