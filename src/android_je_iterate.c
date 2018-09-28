@@ -19,8 +19,54 @@ static bool malloc_disabled_tcache;
 
 int je_iterate(uintptr_t base, size_t size,
     void (*callback)(uintptr_t ptr, size_t size, void* arg), void* arg) {
-  // TODO: Figure out how to implement this functionality for jemalloc5.
-  return -1;
+  size_t pagesize = getpagesize();
+  tsd_t* tsd = tsd_fetch_min();
+  rtree_ctx_t *rtree_ctx = tsd_rtree_ctx(tsd);
+
+  // Make sure the pointer is aligned to at least 8 bytes.
+  uintptr_t ptr = (base + 7) & ~7;
+  uintptr_t end_ptr = ptr + size;
+  while (ptr < end_ptr) {
+    extent_t* extent = iealloc(tsd_tsdn(tsd), (void*)ptr);
+    if (extent == NULL) {
+      // Skip to the next page, guaranteed no other pointers on this page.
+      ptr += pagesize;
+      continue;
+    }
+
+    szind_t szind;
+    bool slab;
+    rtree_szind_slab_read(tsd_tsdn(tsd), &extents_rtree, rtree_ctx, ptr, true, &szind, &slab);
+    if (slab) {
+      // Small allocation.
+      szind_t binind = extent_szind_get(extent);
+      const bin_info_t* bin_info = &bin_infos[binind];
+      arena_slab_data_t* slab_data = extent_slab_data_get(extent);
+
+      uintptr_t first_ptr = (uintptr_t)extent_addr_get(extent);
+      size_t bin_size = bin_info->reg_size;
+      // Align the pointer to the bin size.
+      ptr = (ptr + bin_size - 1) & ~(bin_size - 1);
+      for (size_t bit = (ptr - first_ptr) / bin_size; bit < bin_info->bitmap_info.nbits; bit++) {
+        if (bitmap_get(slab_data->bitmap, &bin_info->bitmap_info, bit)) {
+          uintptr_t allocated_ptr = first_ptr + bin_size * bit;
+          if (allocated_ptr >= end_ptr) {
+            break;
+          }
+          callback(allocated_ptr, bin_size, arg);
+        }
+      }
+    } else if (extent_state_get(extent) == extent_state_active) {
+      // Large allocation.
+      uintptr_t base_ptr = (uintptr_t)extent_addr_get(extent);
+      if (ptr <= base_ptr) {
+        // This extent is actually allocated and within the range to check.
+        callback(base_ptr, extent_usize_get(extent), arg);
+      }
+    }
+    ptr = (uintptr_t)extent_past_get(extent);
+  }
+  return 0;
 }
 
 static void je_malloc_disable_prefork() {
@@ -51,6 +97,9 @@ void je_malloc_disable() {
   pthread_mutex_lock(&malloc_disabled_lock);
   bool new_tcache = false;
   size_t old_len = sizeof(malloc_disabled_tcache);
+
+  // Disable the tcache (if not already disabled) so that we don't
+  // have to search the tcache for pointers.
   je_mallctl("thread.tcache.enabled",
       &malloc_disabled_tcache, &old_len,
       &new_tcache, sizeof(new_tcache));
@@ -60,6 +109,7 @@ void je_malloc_disable() {
 void je_malloc_enable() {
   jemalloc_postfork_parent();
   if (malloc_disabled_tcache) {
+    // Re-enable the tcache if it was enabled before the disabled call.
     je_mallctl("thread.tcache.enabled", NULL, NULL,
         &malloc_disabled_tcache, sizeof(malloc_disabled_tcache));
   }

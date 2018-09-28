@@ -242,8 +242,11 @@ rtree_leaf_elm_lookup_hard(tsdn_t *tsdn, rtree_t *rtree, rtree_ctx_t *rtree_ctx,
 
 #define RTREE_GET_CHILD(level) {					\
 		assert(level < RTREE_HEIGHT-1);				\
-		if (level != 0 && !dependent &&				\
-		    unlikely(!rtree_node_valid(node))) {		\
+		/* ANDROID CHANGE: Bad pointers return NULL */		\
+		/* if (level != 0 && !dependent && */			\
+		/*    unlikely(!rtree_node_valid(node))) { */		\
+		if (unlikely(!rtree_node_valid(node))) {		\
+		/* ANDROID END CHANGE */				\
 			return NULL;					\
 		}							\
 		uintptr_t subkey = rtree_subkey(key, level);		\
@@ -268,7 +271,10 @@ rtree_leaf_elm_lookup_hard(tsdn_t *tsdn, rtree_t *rtree, rtree_ctx_t *rtree_ctx,
 	 */
 #define RTREE_GET_LEAF(level) {						\
 		assert(level == RTREE_HEIGHT-1);			\
-		if (!dependent && unlikely(!rtree_leaf_valid(leaf))) {	\
+		/* ANDROID CHANGE: Bad pointers return NULL */		\
+		/* if (!dependent && unlikely(!rtree_leaf_valid(leaf))) {*/	\
+		if (unlikely(!rtree_leaf_valid(leaf))) {		\
+		/* ANDROID END CHANGE */				\
 			return NULL;					\
 		}							\
 		if (RTREE_CTX_NCACHE_L2 > 1) {				\

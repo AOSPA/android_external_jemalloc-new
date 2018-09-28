@@ -66,7 +66,8 @@ android_common_cflags = [
     // These parameters will be overridden by android_product_variables
     // for non-svelte configs.
     "-DANDROID_NUM_ARENAS=1",
-    "-DANDROID_TCACHE_NSLOTS_SMALL_MAX=1",
+    // This value cannot go below 2.
+    "-DANDROID_TCACHE_NSLOTS_SMALL_MAX=2",
     "-DANDROID_TCACHE_NSLOTS_LARGE=1",
 ]
 
@@ -74,6 +75,8 @@ android_product_variables = {
     // Only enable the tcache on non-svelte configurations, to save PSS.
     malloc_not_svelte: {
         cflags: [
+            "-DANDROID_ENABLE_TCACHE",
+
             "-UANDROID_NUM_ARENAS",
             "-DANDROID_NUM_ARENAS=2",
 
