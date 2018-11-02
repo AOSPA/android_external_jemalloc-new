@@ -9,7 +9,11 @@
 /******************************************************************************/
 /* Data. */
 
+#if !defined(__BIONIC__) || defined(ANDROID_ENABLE_TCACHE)
 bool	opt_tcache = true;
+#else
+bool	opt_tcache = false;
+#endif
 ssize_t	opt_lg_tcache_max = LG_TCACHE_MAXCLASS_DEFAULT;
 
 cache_bin_info_t	*tcache_bin_info;

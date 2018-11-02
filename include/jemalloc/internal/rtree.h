@@ -336,7 +336,12 @@ rtree_leaf_elm_lookup(tsdn_t *tsdn, rtree_t *rtree, rtree_ctx_t *rtree_ctx,
 	/* Fast path: L1 direct mapped cache. */
 	if (likely(rtree_ctx->cache[slot].leafkey == leafkey)) {
 		rtree_leaf_elm_t *leaf = rtree_ctx->cache[slot].leaf;
-		assert(leaf != NULL);
+		/* ANDROID CHANGE: Bad pointers return NULL */
+		/* assert(leaf != NULL); */
+		if (leaf == NULL) {
+			return NULL;
+		}
+		/* ANDROID END CHANGE */
 		uintptr_t subkey = rtree_subkey(key, RTREE_HEIGHT-1);
 		return &leaf[subkey];
 	}
@@ -347,7 +352,12 @@ rtree_leaf_elm_lookup(tsdn_t *tsdn, rtree_t *rtree, rtree_ctx_t *rtree_ctx,
 #define RTREE_CACHE_CHECK_L2(i) do {					\
 	if (likely(rtree_ctx->l2_cache[i].leafkey == leafkey)) {	\
 		rtree_leaf_elm_t *leaf = rtree_ctx->l2_cache[i].leaf;	\
-		assert(leaf != NULL);					\
+		/* ANDROID CHANGE: Bad pointers return NULL */		\
+		/* assert(leaf != NULL); */				\
+		if (leaf == NULL) {					\
+			return NULL;					\
+		}							\
+		/* ANDROID END CHANGE */				\
 		if (i > 0) {						\
 			/* Bubble up by one. */				\
 			rtree_ctx->l2_cache[i].leafkey =		\
@@ -405,7 +415,10 @@ rtree_read(tsdn_t *tsdn, rtree_t *rtree, rtree_ctx_t *rtree_ctx, uintptr_t key,
     bool dependent) {
 	rtree_leaf_elm_t *elm = rtree_leaf_elm_lookup(tsdn, rtree, rtree_ctx,
 	    key, dependent, false);
-	if (!dependent && elm == NULL) {
+	/* ANDROID CHANGE: Bad pointers return NULL */
+	/* if (!dependent && elm == NULL) { */
+	if (elm == NULL) {
+	/* ANDROID END CHANGE */
 		return NULL;
 	}
 	assert(elm != NULL);
@@ -417,7 +430,10 @@ rtree_extent_read(tsdn_t *tsdn, rtree_t *rtree, rtree_ctx_t *rtree_ctx,
     uintptr_t key, bool dependent) {
 	rtree_leaf_elm_t *elm = rtree_read(tsdn, rtree, rtree_ctx, key,
 	    dependent);
-	if (!dependent && elm == NULL) {
+	/* ANDROID CHANGE: Bad pointers return NULL */
+	/* if (!dependent && elm == NULL) { */
+	if (elm == NULL) {
+	/* ANDROID END CHANGE */
 		return NULL;
 	}
 	return rtree_leaf_elm_extent_read(tsdn, rtree, elm, dependent);
@@ -428,7 +444,9 @@ rtree_szind_read(tsdn_t *tsdn, rtree_t *rtree, rtree_ctx_t *rtree_ctx,
     uintptr_t key, bool dependent) {
 	rtree_leaf_elm_t *elm = rtree_read(tsdn, rtree, rtree_ctx, key,
 	    dependent);
-	if (!dependent && elm == NULL) {
+	/* ANDROID CHANGE: Bad pointers return NULL */
+	/* if (!dependent && elm == NULL) { */
+	if (elm == NULL) {
 		return NSIZES;
 	}
 	return rtree_leaf_elm_szind_read(tsdn, rtree, elm, dependent);
@@ -444,7 +462,10 @@ rtree_extent_szind_read(tsdn_t *tsdn, rtree_t *rtree, rtree_ctx_t *rtree_ctx,
     uintptr_t key, bool dependent, extent_t **r_extent, szind_t *r_szind) {
 	rtree_leaf_elm_t *elm = rtree_read(tsdn, rtree, rtree_ctx, key,
 	    dependent);
-	if (!dependent && elm == NULL) {
+	/* ANDROID CHANGE: Bad pointers return NULL */
+	/* if (!dependent && elm == NULL) { */
+	if (elm == NULL) {
+	/* ANDROID END CHANGE */
 		return true;
 	}
 	*r_extent = rtree_leaf_elm_extent_read(tsdn, rtree, elm, dependent);
@@ -457,7 +478,10 @@ rtree_szind_slab_read(tsdn_t *tsdn, rtree_t *rtree, rtree_ctx_t *rtree_ctx,
     uintptr_t key, bool dependent, szind_t *r_szind, bool *r_slab) {
 	rtree_leaf_elm_t *elm = rtree_read(tsdn, rtree, rtree_ctx, key,
 	    dependent);
-	if (!dependent && elm == NULL) {
+	/* ANDROID CHANGE: Bad pointers return NULL */
+	/* if (!dependent && elm == NULL) { */
+	if (elm == NULL) {
+	/* ANDROID END CHANGE */
 		return true;
 	}
 #ifdef RTREE_LEAF_COMPACT

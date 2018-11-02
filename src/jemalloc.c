@@ -875,7 +875,7 @@ malloc_conf_init(void) {
 	const char *opts, *k, *v;
 	size_t klen, vlen;
 
-#if defined(__ANDROID__)
+#if defined(__BIONIC__)
 	/* For Android, do not look at files nor environment variables for
 	 * config data.
 	 */
@@ -1353,7 +1353,7 @@ static bool
 malloc_init_hard_recursible(void) {
 	malloc_init_state = malloc_init_recursible;
 
-#if defined(__ANDROID__) && defined(ANDROID_NUM_ARENAS)
+#if defined(__BIONIC__) && defined(ANDROID_NUM_ARENAS)
 	/* Hardcode since this value won't be used. */ 
 	ncpus = 2;
 #else
@@ -3341,7 +3341,7 @@ jemalloc_postfork_child(void) {
 
 /******************************************************************************/
 
-#if defined(__ANDROID__) && !defined(JEMALLOC_JET)
+#if defined(__BIONIC__) && !defined(JEMALLOC_JET)
 #include "android_je_iterate.c"
 #include "android_je_mallinfo.c"
 #endif

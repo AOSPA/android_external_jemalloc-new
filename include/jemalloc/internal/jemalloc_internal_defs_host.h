@@ -334,7 +334,9 @@
 #define LG_SIZEOF_INTMAX_T 3
 
 /* glibc malloc hooks (__malloc_hook, __realloc_hook, __free_hook). */
+#if !defined(__ANDROID__)
 #define JEMALLOC_GLIBC_MALLOC_HOOK 
+#endif
 
 /* glibc memalign hook. */
 #define JEMALLOC_GLIBC_MEMALIGN_HOOK 
