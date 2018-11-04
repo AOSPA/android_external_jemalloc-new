@@ -4,7 +4,7 @@
  * these macro definitions.
  */
 #ifndef JEMALLOC_NO_RENAME
-#if defined(__ANDROID__)
+#if defined(__BIONIC__)
 #  define je_aligned_alloc je_aligned_alloc
 #  define je_calloc je_calloc
 #  define je_dallocx je_dallocx
