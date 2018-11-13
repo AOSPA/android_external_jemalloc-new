@@ -215,7 +215,12 @@
  * system does not explicitly support huge pages; system calls that require
  * explicit huge page support are separately configured.
  */
+/* ANDROID NOTE: This determines how big a default map'd page is. */
+#if !defined(__LP64__)
+#define LG_HUGEPAGE 20
+#else
 #define LG_HUGEPAGE 21
+#endif
 
 /*
  * If defined, adjacent virtual memory mappings with identical attributes
