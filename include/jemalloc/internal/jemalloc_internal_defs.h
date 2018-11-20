@@ -1,4 +1,6 @@
-#if !defined(__ANDROID__)
+/* Include cdefs to see if __BIONIC__ is set */
+#include <sys/cdefs.h>
+#if !defined(__BIONIC__)
 #include "jemalloc_internal_defs_host.h"
 #else
 /* include/jemalloc/internal/jemalloc_internal_defs.h.  Generated from jemalloc_internal_defs.h.in by configure.  */
@@ -213,7 +215,12 @@
  * system does not explicitly support huge pages; system calls that require
  * explicit huge page support are separately configured.
  */
+/* ANDROID NOTE: This determines how big a default map'd page is. */
+#if !defined(__LP64__)
+#define LG_HUGEPAGE 20
+#else
 #define LG_HUGEPAGE 21
+#endif
 
 /*
  * If defined, adjacent virtual memory mappings with identical attributes
@@ -297,12 +304,13 @@
  *                                 MADV_FREE, though typically with higher
  *                                 system overhead.
  */
-#define JEMALLOC_PURGE_MADVISE_FREE 
+/* MADV_FREE available since kernel 4.5 but not all devices support this yet. */
+/* #undef JEMALLOC_PURGE_MADVISE_FREE */
 #define JEMALLOC_PURGE_MADVISE_DONTNEED 
 #define JEMALLOC_PURGE_MADVISE_DONTNEED_ZEROS 
 
 /* Defined if madvise(2) is available but MADV_FREE is not (x86 Linux only). */
-/* #undef JEMALLOC_DEFINE_MADVISE_FREE */
+#define JEMALLOC_DEFINE_MADVISE_FREE 
 
 /*
  * Defined if MADV_DO[NT]DUMP is supported as an argument to madvise.

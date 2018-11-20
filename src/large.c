@@ -42,7 +42,7 @@ large_palloc(tsdn_t *tsdn, arena_t *arena, size_t usize, size_t alignment,
 	 */
 	is_zeroed = zero;
 	if (likely(!tsdn_null(tsdn))) {
-#if defined(__ANDROID__) && !defined(__LP64__)
+#if defined(__BIONIC__) && !defined(__LP64__) && !defined(JEMALLOC_JET) && !defined(JEMALLOC_INTEGRATION_TEST)
 		/* On 32 bit systems, using a per arena cache can exhaust
 		 * virtual address space. Force all huge allocations to
 		 * always take place in the first arena.
