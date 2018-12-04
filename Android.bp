@@ -158,6 +158,7 @@ cc_library {
             shared: {
                 enabled: false,
             },
+            system_shared_libs: [],
         },
     },
 }
