@@ -160,6 +160,9 @@ cc_library {
             },
             system_shared_libs: [],
         },
+        linux_bionic: {
+            system_shared_libs: [],
+        },
     },
 }
 
