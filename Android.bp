@@ -158,6 +158,10 @@ cc_library {
             shared: {
                 enabled: false,
             },
+            system_shared_libs: [],
+        },
+        linux_bionic: {
+            system_shared_libs: [],
         },
     },
 }
