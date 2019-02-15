@@ -372,7 +372,7 @@
 /*
  * If defined, all the features necessary for background threads are present.
  */
-#define JEMALLOC_BACKGROUND_THREAD 1
+/* #undef JEMALLOC_BACKGROUND_THREAD */
 
 /*
  * If defined, jemalloc symbols are not exported (doesn't work when
