@@ -394,6 +394,12 @@ extents_fit_alignment(extents_t *extents, size_t min_size, size_t max_size,
 	return NULL;
 }
 
+// ANDROID
+// The best-fit selection is reported to possiblity cause a memory leak.
+// This code has been completely removed from 5.2.0, so remove it from
+// our tree rather than risk a leak.
+// See https://github.com/jemalloc/jemalloc/issues/1454
+#if 0
 /* Do any-best-fit extent selection, i.e. select any extent that best fits. */
 static extent_t *
 extents_best_fit_locked(tsdn_t *tsdn, arena_t *arena, extents_t *extents,
@@ -417,6 +423,7 @@ extents_best_fit_locked(tsdn_t *tsdn, arena_t *arena, extents_t *extents,
 
 	return NULL;
 }
+#endif
 
 /*
  * Do first-fit extent selection, i.e. select the oldest/lowest extent that is
@@ -464,8 +471,17 @@ extents_fit_locked(tsdn_t *tsdn, arena_t *arena, extents_t *extents,
 		return NULL;
 	}
 
+// ANDROID
+// The best-fit selection is reported to possiblity cause a memory leak.
+// This code has been completely removed from 5.2.0, so remove it from
+// our tree rather than risk a leak.
+// See https://github.com/jemalloc/jemalloc/issues/1454
+#if 0
 	extent_t *extent = extents->delay_coalesce ?
 	    extents_best_fit_locked(tsdn, arena, extents, max_size) :
+	    extents_first_fit_locked(tsdn, arena, extents, max_size);
+#endif
+	extent_t *extent =
 	    extents_first_fit_locked(tsdn, arena, extents, max_size);
 
 	if (alignment > PAGE && extent == NULL) {
