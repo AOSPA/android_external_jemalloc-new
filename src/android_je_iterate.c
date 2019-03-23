@@ -34,6 +34,12 @@ int je_iterate(uintptr_t base, size_t size,
       continue;
     }
 
+    if (extent_szind_get_maybe_invalid(extent) >= NSIZES) {
+      // Ignore this unused extent.
+      ptr = (uintptr_t)extent_past_get(extent);
+      continue;
+    }
+
     szind_t szind;
     bool slab;
     rtree_szind_slab_read(tsd_tsdn(tsd), &extents_rtree, rtree_ctx, ptr, true, &szind, &slab);
@@ -56,8 +62,7 @@ int je_iterate(uintptr_t base, size_t size,
           callback(allocated_ptr, bin_size, arg);
         }
       }
-    } else if (extent_state_get(extent) == extent_state_active &&
-               extent_szind_get_maybe_invalid(extent) < NSIZES) {
+    } else if (extent_state_get(extent) == extent_state_active) {
       // Large allocation.
       uintptr_t base_ptr = (uintptr_t)extent_addr_get(extent);
       if (ptr <= base_ptr) {
