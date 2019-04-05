@@ -59,9 +59,6 @@ common_c_local_includes = [
 //     1 << XX is the maximum sized allocation that will be in the tcache.
 
 android_common_cflags = [
-    "-DANDROID_TCACHE_NSLOTS_SMALL_MIN=1",
-    "-DANDROID_LG_TCACHE_MAXCLASS_DEFAULT=16",
-
     // Default some parameters to small values to minimize PSS.
     // These parameters will be overridden by android_product_variables
     // for non-svelte configs.
@@ -76,6 +73,7 @@ android_product_variables = {
     malloc_not_svelte: {
         cflags: [
             "-DANDROID_ENABLE_TCACHE",
+            "-DANDROID_LG_TCACHE_MAXCLASS_DEFAULT=16",
 
             "-UANDROID_NUM_ARENAS",
             "-DANDROID_NUM_ARENAS=2",
