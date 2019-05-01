@@ -1289,10 +1289,14 @@ arena_tcache_fill_small(tsdn_t *tsdn, arena_t *arena, tcache_t *tcache,
 	}
 	if (config_stats) {
 		bin->stats.nmalloc += i;
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 		bin->stats.nrequests += tbin->tstats.nrequests;
+#endif
 		bin->stats.curregs += i;
 		bin->stats.nfills++;
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 		tbin->tstats.nrequests = 0;
+#endif
 	}
 	malloc_mutex_unlock(tsdn, &bin->lock);
 	tbin->ncached = i;
