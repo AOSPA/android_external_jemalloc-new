@@ -140,8 +140,10 @@ tcache_bin_flush_small(tsd_t *tsd, tcache_t *tcache, cache_bin_t *tbin,
 			assert(!merged_stats);
 			merged_stats = true;
 			bin->stats.nflushes++;
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 			bin->stats.nrequests += tbin->tstats.nrequests;
 			tbin->tstats.nrequests = 0;
+#endif
 		}
 		unsigned ndeferred = 0;
 		for (unsigned i = 0; i < nflush; i++) {
@@ -176,8 +178,10 @@ tcache_bin_flush_small(tsd_t *tsd, tcache_t *tcache, cache_bin_t *tbin,
 		bin_t *bin = &arena->bins[binind];
 		malloc_mutex_lock(tsd_tsdn(tsd), &bin->lock);
 		bin->stats.nflushes++;
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 		bin->stats.nrequests += tbin->tstats.nrequests;
 		tbin->tstats.nrequests = 0;
+#endif
 		malloc_mutex_unlock(tsd_tsdn(tsd), &bin->lock);
 	}
 
@@ -192,7 +196,9 @@ tcache_bin_flush_small(tsd_t *tsd, tcache_t *tcache, cache_bin_t *tbin,
 void
 tcache_bin_flush_large(tsd_t *tsd, cache_bin_t *tbin, szind_t binind,
     unsigned rem, tcache_t *tcache) {
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 	bool merged_stats = false;
+#endif
 
 	assert(binind < nhbins);
 	assert((cache_bin_sz_t)rem <= tbin->ncached);
@@ -232,6 +238,7 @@ tcache_bin_flush_large(tsd_t *tsd, cache_bin_t *tbin, szind_t binind,
 				    tcache->prof_accumbytes);
 				tcache->prof_accumbytes = 0;
 			}
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 			if (config_stats) {
 				merged_stats = true;
 				arena_stats_large_nrequests_add(tsd_tsdn(tsd),
@@ -239,6 +246,7 @@ tcache_bin_flush_large(tsd_t *tsd, cache_bin_t *tbin, szind_t binind,
 				    tbin->tstats.nrequests);
 				tbin->tstats.nrequests = 0;
 			}
+#endif
 		}
 		malloc_mutex_unlock(tsd_tsdn(tsd), &locked_arena->large_mtx);
 
@@ -269,6 +277,7 @@ tcache_bin_flush_large(tsd_t *tsd, cache_bin_t *tbin, szind_t binind,
 		    ndeferred);
 		nflush = ndeferred;
 	}
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 	if (config_stats && !merged_stats) {
 		/*
 		 * The flush loop didn't happen to flush to this thread's
@@ -278,6 +287,7 @@ tcache_bin_flush_large(tsd_t *tsd, cache_bin_t *tbin, szind_t binind,
 		    binind, tbin->tstats.nrequests);
 		tbin->tstats.nrequests = 0;
 	}
+#endif
 
 	memmove(tbin->avail - rem, tbin->avail - tbin->ncached, rem *
 	    sizeof(void *));
@@ -466,17 +476,21 @@ tcache_flush_cache(tsd_t *tsd, tcache_t *tcache) {
 		cache_bin_t *tbin = tcache_small_bin_get(tcache, i);
 		tcache_bin_flush_small(tsd, tcache, tbin, i, 0);
 
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 		if (config_stats) {
 			assert(tbin->tstats.nrequests == 0);
 		}
+#endif
 	}
 	for (unsigned i = NBINS; i < nhbins; i++) {
 		cache_bin_t *tbin = tcache_large_bin_get(tcache, i);
 		tcache_bin_flush_large(tsd, tbin, i, 0, tcache);
 
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 		if (config_stats) {
 			assert(tbin->tstats.nrequests == 0);
 		}
+#endif
 	}
 
 	if (config_prof && tcache->prof_accumbytes > 0 &&
@@ -531,6 +545,7 @@ tcache_cleanup(tsd_t *tsd) {
 
 void
 tcache_stats_merge(tsdn_t *tsdn, tcache_t *tcache, arena_t *arena) {
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 	unsigned i;
 
 	cassert(config_stats);
@@ -551,6 +566,7 @@ tcache_stats_merge(tsdn_t *tsdn, tcache_t *tcache, arena_t *arena) {
 		    tbin->tstats.nrequests);
 		tbin->tstats.nrequests = 0;
 	}
+#endif
 }
 
 static bool
