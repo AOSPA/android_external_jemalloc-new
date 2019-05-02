@@ -46,12 +46,15 @@ struct cache_bin_s {
 	cache_bin_sz_t low_water;
 	/* # of cached objects. */
 	cache_bin_sz_t ncached;
+        /* Removing this variable make the cache_t structure fit in a single page. */
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 	/*
 	 * ncached and stats are both modified frequently.  Let's keep them
 	 * close so that they have a higher chance of being on the same
 	 * cacheline, thus less write-backs.
 	 */
 	cache_bin_stats_t tstats;
+#endif
 	/*
 	 * Stack of available objects.
 	 *
