@@ -1025,13 +1025,6 @@ static void
 malloc_conf_init_helper(sc_data_t *sc_data, unsigned bin_shard_sizes[SC_NBINS],
     bool initial_call, const char *opts_cache[MALLOC_CONF_NSOURCES],
     char buf[PATH_MAX + 1]) {
-	static const char *opts_explain[MALLOC_CONF_NSOURCES] = {
-		"string specified via --with-malloc-conf",
-		"string pointed to by the global variable malloc_conf",
-		"\"name\" of the file referenced by the symbolic link named "
-		    "/etc/malloc.conf",
-		"value of the environment variable MALLOC_CONF"
-	};
 	unsigned i;
 	const char *opts, *k, *v;
 	size_t klen, vlen;
@@ -1042,11 +1035,6 @@ malloc_conf_init_helper(sc_data_t *sc_data, unsigned bin_shard_sizes[SC_NBINS],
 			opts_cache[i] = obtain_malloc_conf(i, buf);
 		}
 		opts = opts_cache[i];
-		if (!initial_call && opt_confirm_conf) {
-			malloc_printf(
-			    "<jemalloc>: malloc_conf #%u (%s): \"%s\"\n",
-			    i + 1, opts_explain[i], opts != NULL ? opts : "");
-		}
 		if (opts == NULL) {
 			continue;
 		}
@@ -1442,7 +1430,7 @@ malloc_conf_init_helper(sc_data_t *sc_data, unsigned bin_shard_sizes[SC_NBINS],
 
 static void
 malloc_conf_init(sc_data_t *sc_data, unsigned bin_shard_sizes[SC_NBINS]) {
-	const char *opts_cache[MALLOC_CONF_NSOURCES] = {NULL, NULL, NULL, NULL};
+	const char *opts_cache[MALLOC_CONF_NSOURCES] = {NULL,};
 	char buf[PATH_MAX + 1];
 
 	/* The first call only set the confirm_conf option and opts_cache */
