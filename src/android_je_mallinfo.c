@@ -21,23 +21,24 @@ static size_t accumulate_large_allocs(arena_t* arena) {
    * Do not include stats.allocated_large, it is only updated by
    * arena_stats_merge, and would include the data counted below.
    */
-  for (unsigned j = 0; j < NSIZES - NBINS; j++) {
+  for (unsigned j = 0; j < SC_NSIZES - SC_NBINS; j++) {
     /* Read ndalloc first so that we guarantee nmalloc >= ndalloc. */
     uint64_t ndalloc = arena_stats_read_u64(TSDN_NULL, &arena->stats, &arena->stats.lstats[j].ndalloc);
     uint64_t nmalloc = arena_stats_read_u64(TSDN_NULL, &arena->stats, &arena->stats.lstats[j].nmalloc);
     size_t allocs = (size_t)(nmalloc - ndalloc);
-    total_bytes += sz_index2size(NBINS + j) * allocs;
+    total_bytes += sz_index2size(SC_NBINS + j) * allocs;
   }
   return total_bytes;
 }
 
 static size_t accumulate_small_allocs(arena_t* arena) {
   size_t total_bytes = 0;
-  for (unsigned j = 0; j < NBINS; j++) {
-    bin_t* bin = &arena->bins[j];
+  unsigned binshard;
+  bin_t* bin;
+  for (unsigned j = 0; j < SC_NBINS; j++) {
+    bin = arena_bin_choose_lock(TSDN_NULL, arena, j, &binshard);
 
     /* NOTE: This includes allocations cached on every thread. */
-    malloc_mutex_lock(TSDN_NULL, &bin->lock);
     total_bytes += bin_infos[j].reg_size * bin->stats.curregs;
     malloc_mutex_unlock(TSDN_NULL, &bin->lock);
   }
@@ -73,7 +74,7 @@ size_t je_mallinfo_narenas() {
 }
 
 size_t je_mallinfo_nbins() {
-  return NBINS;
+  return SC_NBINS;
 }
 
 struct mallinfo je_mallinfo_arena_info(size_t aidx) {
@@ -98,12 +99,12 @@ struct mallinfo je_mallinfo_bin_info(size_t aidx, size_t bidx) {
   memset(&mi, 0, sizeof(mi));
 
   malloc_mutex_lock(TSDN_NULL, &arenas_lock);
-  if (aidx < narenas_auto && bidx < NBINS) {
+  if (aidx < narenas_auto && bidx < SC_NBINS) {
     arena_t* arena = atomic_load_p(&arenas[aidx], ATOMIC_ACQUIRE);
     if (arena != NULL) {
-      bin_t* bin = &arena->bins[bidx];
+      unsigned binshard;
+      bin_t* bin = arena_bin_choose_lock(TSDN_NULL, arena, (szind_t)bidx, &binshard);
 
-      malloc_mutex_lock(TSDN_NULL, &bin->lock);
       mi.ordblks = bin_infos[bidx].reg_size * bin->stats.curregs;
       mi.uordblks = (size_t) bin->stats.nmalloc;
       mi.fordblks = (size_t) bin->stats.ndalloc;
