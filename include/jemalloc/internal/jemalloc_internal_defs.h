@@ -291,7 +291,7 @@
  * Defined if transparent huge pages are supported via the MADV_[NO]HUGEPAGE
  * arguments to madvise(2).
  */
-#define JEMALLOC_HAVE_MADVISE_HUGE 
+/* #undef JEMALLOC_HAVE_MADVISE_HUGE */
 
 /*
  * Methods for purging unused pages differ between operating systems.
@@ -318,12 +318,6 @@
  * Defined if MADV_DO[NT]DUMP is supported as an argument to madvise.
  */
 #define JEMALLOC_MADVISE_DONTDUMP 
-
-/*
- * Defined if transparent huge pages (THPs) are supported via the
- * MADV_[NO]HUGEPAGE arguments to madvise(2), and THP support is enabled.
- */
-/* #undef JEMALLOC_THP */
 
 /* Define if operating system has alloca.h header. */
 #define JEMALLOC_HAS_ALLOCA_H 1
