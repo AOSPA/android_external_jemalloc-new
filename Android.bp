@@ -146,6 +146,7 @@ lib_src_files = [
 //-----------------------------------------------------------------------
 cc_library {
     name: "libjemalloc5",
+    ramdisk_available: true,
     recovery_available: true,
 
     defaults: ["jemalloc5_defaults"],
