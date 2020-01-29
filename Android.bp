@@ -153,6 +153,8 @@ cc_library {
 
     srcs: lib_src_files,
 
+    export_include_dirs: ["include"],
+
     target: {
         android: {
             shared: {
