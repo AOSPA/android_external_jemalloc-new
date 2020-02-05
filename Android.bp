@@ -146,11 +146,14 @@ lib_src_files = [
 //-----------------------------------------------------------------------
 cc_library {
     name: "libjemalloc5",
+    ramdisk_available: true,
     recovery_available: true,
 
     defaults: ["jemalloc5_defaults"],
 
     srcs: lib_src_files,
+
+    export_include_dirs: ["include"],
 
     target: {
         android: {
