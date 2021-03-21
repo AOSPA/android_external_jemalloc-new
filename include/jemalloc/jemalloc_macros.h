@@ -4,12 +4,13 @@
 #include <limits.h>
 #include <strings.h>
 
-#define JEMALLOC_VERSION "5.1.0-0-g61efbda7098de6fe64c362d309824864308c36d4"
+#define JEMALLOC_VERSION "5.2.1-110-g8d7998a73dff4dcc27457c15a9110669d2d932b9"
 #define JEMALLOC_VERSION_MAJOR 5
-#define JEMALLOC_VERSION_MINOR 1
-#define JEMALLOC_VERSION_BUGFIX 0
-#define JEMALLOC_VERSION_NREV 0
-#define JEMALLOC_VERSION_GID "61efbda7098de6fe64c362d309824864308c36d4"
+#define JEMALLOC_VERSION_MINOR 2
+#define JEMALLOC_VERSION_BUGFIX 1
+#define JEMALLOC_VERSION_NREV 110
+#define JEMALLOC_VERSION_GID "8d7998a73dff4dcc27457c15a9110669d2d932b9"
+#define JEMALLOC_VERSION_GID_IDENT 8d7998a73dff4dcc27457c15a9110669d2d932b9
 
 #define MALLOCX_LG_ALIGN(la)	((int)(la))
 #if LG_SIZEOF_PTR == 2
@@ -68,6 +69,7 @@
 #      define JEMALLOC_EXPORT __declspec(dllimport)
 #    endif
 #  endif
+#  define JEMALLOC_FORMAT_ARG(i)
 #  define JEMALLOC_FORMAT_PRINTF(s, i)
 #  define JEMALLOC_NOINLINE __declspec(noinline)
 #  ifdef __cplusplus
@@ -94,6 +96,11 @@
 #  endif
 #  ifndef JEMALLOC_EXPORT
 #    define JEMALLOC_EXPORT JEMALLOC_ATTR(visibility("default"))
+#  endif
+#  ifdef JEMALLOC_HAVE_ATTR_FORMAT_ARG
+#    define JEMALLOC_FORMAT_ARG(i) JEMALLOC_ATTR(__format_arg__(3))
+#  else
+#    define JEMALLOC_FORMAT_ARG(i)
 #  endif
 #  ifdef JEMALLOC_HAVE_ATTR_FORMAT_GNU_PRINTF
 #    define JEMALLOC_FORMAT_PRINTF(s, i) JEMALLOC_ATTR(format(gnu_printf, s, i))

@@ -22,6 +22,7 @@
 #  define malloc_stats_print jet_malloc_stats_print
 #  define malloc_usable_size jet_malloc_usable_size
 #  define mallocx jet_mallocx
+#  define smallocx_8d7998a73dff4dcc27457c15a9110669d2d932b9 jet_smallocx_8d7998a73dff4dcc27457c15a9110669d2d932b9
 #  define nallocx jet_nallocx
 #  define posix_memalign jet_posix_memalign
 #  define rallocx jet_rallocx
@@ -54,6 +55,7 @@
 #  undef jet_malloc_stats_print
 #  undef jet_malloc_usable_size
 #  undef jet_mallocx
+#  undef jet_smallocx_8d7998a73dff4dcc27457c15a9110669d2d932b9
 #  undef jet_nallocx
 #  undef jet_posix_memalign
 #  undef jet_rallocx

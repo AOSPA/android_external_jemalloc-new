@@ -5,6 +5,9 @@
 /* Defined if alloc_size attribute is supported. */
 #define JEMALLOC_HAVE_ATTR_ALLOC_SIZE 
 
+/* Defined if format_arg(...) attribute is supported. */
+#define JEMALLOC_HAVE_ATTR_FORMAT_ARG 
+
 /* Defined if format(gnu_printf, ...) attribute is supported. */
 /* #undef JEMALLOC_HAVE_ATTR_FORMAT_GNU_PRINTF */
 
@@ -16,7 +19,7 @@
  * present on the system.
  */
 #define JEMALLOC_OVERRIDE_MEMALIGN 
-#define JEMALLOC_OVERRIDE_VALLOC 
+#define JEMALLOC_OVERRIDE_VALLOC
 
 /*
  * At least Linux omits the "const" in:
