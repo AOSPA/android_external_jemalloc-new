@@ -150,7 +150,7 @@ tcache_alloc_large(tsd_t *tsd, arena_t *arena, tcache_t *tcache, size_t size,
 			memset(ret, 0, usize);
 		}
 
-#if defined(ANDROID_ENABLE_TCACHE_STATUS)
+#if defined(ANDROID_ENABLE_TCACHE_STATS)
 		if (config_stats) {
 			bin->tstats.nrequests++;
 		}
