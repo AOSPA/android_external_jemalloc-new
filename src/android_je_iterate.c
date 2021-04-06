@@ -34,7 +34,7 @@ int je_malloc_iterate(uintptr_t base, size_t size,
       continue;
     }
 
-    if (extent_szind_get_maybe_invalid(extent) >= NSIZES) {
+    if (extent_szind_get_maybe_invalid(extent) >= SC_NSIZES) {
       // Ignore this unused extent.
       ptr = (uintptr_t)extent_past_get(extent);
       continue;
