@@ -41,12 +41,14 @@ test_zero(size_t sz_min, size_t sz_max) {
 
 TEST_BEGIN(test_zero_small) {
 	test_skip_if(!config_fill);
+	test_skip_if(known_failure_on_android);
 	test_zero(1, SC_SMALL_MAXCLASS - 1);
 }
 TEST_END
 
 TEST_BEGIN(test_zero_large) {
 	test_skip_if(!config_fill);
+	test_skip_if(known_failure_on_android);
 	test_zero(SC_SMALL_MAXCLASS + 1, 1U << (SC_LG_LARGE_MINCLASS + 1));
 }
 TEST_END

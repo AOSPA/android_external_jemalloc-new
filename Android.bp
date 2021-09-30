@@ -446,26 +446,50 @@ unit_tests = [
     "test/unit/zero_reallocs.c",
 ]
 
+genrule_defaults {
+    name: "jemalloc5_gtestifier_defaults",
+    tools: ["gtestifier"],
+    cmd: "$(location gtestifier)" +
+        " --in $(in)" +
+        " --out $(out)" +
+        " --suite jemalloc5" +
+        " --test_name_prefix test_ " +
+        " --main_no_arguments " +
+        " --predicate testResultPredicate",
+}
+
+gensrcs {
+    name: "jemalloc5_unittests_gtestified_srcs",
+    defaults: ["jemalloc5_gtestifier_defaults"],
+    srcs: unit_tests,
+    output_extension: "c",
+}
+
 cc_test {
     name: "jemalloc5_unittests",
 
     defaults: ["jemalloc5_defaults"],
 
-    gtest: false,
-
     cflags: common_cflags + [
         "-DJEMALLOC_UNIT_TEST",
+        "-include jemalloc_gtest.h",
     ],
+
+    stl: "libc++",
 
     local_include_dirs: common_c_local_includes + [
         "test/include",
+        "android/test",
     ],
 
-    srcs: unit_tests,
+    srcs: [":jemalloc5_unittests_gtestified_srcs"],
 
-    static_libs: ["libjemalloc5_unittest"],
+    static_libs: [
+        "libjemalloc5_unittest",
+        "libgtestifier",
+    ],
 
-    test_per_src: true,
+    isolated: true,
 
     target: {
         linux_bionic: {
@@ -521,27 +545,37 @@ integration_tests = [
     "test/integration/xallocx.c",
 ]
 
+gensrcs {
+    name: "jemalloc5_integrationtests_gtestified_srcs",
+    defaults: ["jemalloc5_gtestifier_defaults"],
+    srcs: integration_tests,
+    output_extension: "c",
+}
+
 cc_test {
     name: "jemalloc5_integrationtests",
 
     defaults: ["jemalloc5_defaults"],
 
-    gtest: false,
-
     cflags: common_cflags + [
         "-DJEMALLOC_INTEGRATION_TEST",
         "-DJEMALLOC_NO_RENAME",
+        "-include jemalloc_gtest.h",
     ],
 
     local_include_dirs: common_c_local_includes + [
         "test/include",
+        "android/test",
     ],
 
-    srcs: integration_tests,
+    srcs: [
+        ":jemalloc5_integrationtests_gtestified_srcs",
+    ],
 
-    static_libs: ["libjemalloc5_integrationtest"],
-
-    test_per_src: true,
+    static_libs: [
+        "libjemalloc5_integrationtest",
+        "libgtestifier",
+    ],
 
     target: {
         linux_glibc: {
@@ -585,30 +619,36 @@ stress_tests = [
     "test/stress/microbench.c",
 ]
 
+gensrcs {
+    name: "jemalloc5_stresstests_gtestified_srcs",
+    defaults: ["jemalloc5_gtestifier_defaults"],
+    srcs: stress_tests,
+    output_extension: "c",
+}
+
 cc_test {
     name: "jemalloc5_stresstests",
 
     defaults: ["jemalloc5_defaults"],
 
-    gtest: false,
-
     cflags: common_cflags + [
         "-DJEMALLOC_STRESS_TEST",
+        "-include jemalloc_gtest.h",
     ],
 
     local_include_dirs: common_c_local_includes + [
         "test/include",
+        "android/test",
     ],
 
-    srcs: stress_tests,
+    srcs: [":jemalloc5_stresstests_gtestified_srcs"],
 
     static_libs: [
         "libjemalloc5",
         "libjemalloc5_stresstestlib",
         "libjemalloc5_jet",
+        "libgtestifier",
     ],
-
-    test_per_src: true,
 
     target: {
         linux_glibc: {
@@ -618,4 +658,6 @@ cc_test {
             },
         },
     },
+
+    stl: "libc++",
 }

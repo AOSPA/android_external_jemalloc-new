@@ -2,7 +2,7 @@
 
 #define NTHREADS 10
 
-void *
+static void *
 thd_start(void *arg) {
 	unsigned main_arena_ind = *(unsigned *)arg;
 	void *p;

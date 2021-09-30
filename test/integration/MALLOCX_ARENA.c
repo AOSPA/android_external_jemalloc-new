@@ -2,7 +2,7 @@
 
 #define NTHREADS 10
 
-void *
+static void *
 thd_start(void *arg) {
 	unsigned thread_ind = (unsigned)(uintptr_t)arg;
 	unsigned arena_ind;

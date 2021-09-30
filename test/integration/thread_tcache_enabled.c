@@ -1,6 +1,7 @@
+
 #include "test/jemalloc_test.h"
 
-void *
+static void *
 thd_start(void *arg) {
 	bool e0, e1;
 	size_t sz = sizeof(bool);

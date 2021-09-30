@@ -1,6 +1,6 @@
 #include "test/jemalloc_test.h"
 
-void *
+static void *
 thd_start(void *arg) {
 	int err;
 	void *p;

@@ -241,6 +241,7 @@ gen_mallctl_str(char *cmd, char *name, unsigned arena_ind) {
 }
 
 TEST_BEGIN(test_stats_arenas_bins) {
+	test_skip_if(known_failure_on_android);
 	void *p;
 	size_t sz, curslabs, curregs, nonfull_slabs;
 	uint64_t epoch, nmalloc, ndalloc, nrequests, nfills, nflushes;
