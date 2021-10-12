@@ -1,18 +1,19 @@
 #ifndef JEMALLOC_INTERNAL_ARENA_TYPES_H
 #define JEMALLOC_INTERNAL_ARENA_TYPES_H
 
+#include "jemalloc/internal/sc.h"
+
 /* Maximum number of regions in one slab. */
-#define LG_SLAB_MAXREGS		(LG_PAGE - LG_TINY_MIN)
+#define LG_SLAB_MAXREGS		(LG_PAGE - SC_LG_TINY_MIN)
 #define SLAB_MAXREGS		(1U << LG_SLAB_MAXREGS)
 
 /* Default decay times in milliseconds. */
 #if defined(__ANDROID__)
 #define DIRTY_DECAY_MS_DEFAULT	ZD(0)
-#define MUZZY_DECAY_MS_DEFAULT	ZD(0)
 #else
 #define DIRTY_DECAY_MS_DEFAULT	ZD(10 * 1000)
-#define MUZZY_DECAY_MS_DEFAULT	ZD(10 * 1000)
 #endif
+#define MUZZY_DECAY_MS_DEFAULT	(0)
 /* Number of event ticks between time checks. */
 #define DECAY_NTICKS_PER_UPDATE	1000
 
@@ -44,5 +45,11 @@ typedef enum {
 
 #define PERCPU_ARENA_ENABLED(m)	((m) >= percpu_arena_mode_enabled_base)
 #define PERCPU_ARENA_DEFAULT	percpu_arena_disabled
+
+/*
+ * When allocation_size >= oversize_threshold, use the dedicated huge arena
+ * (unless have explicitly spicified arena index).  0 disables the feature.
+ */
+#define OVERSIZE_THRESHOLD_DEFAULT (8 << 20)
 
 #endif /* JEMALLOC_INTERNAL_ARENA_TYPES_H */
