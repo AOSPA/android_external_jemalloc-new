@@ -359,6 +359,7 @@ cc_library_static {
     cflags: [
         "-U_FORTIFY_SOURCE",
         "-DJEMALLOC_INTEGRATION_TEST",
+        "-DJEMALLOC_NO_RENAME",
     ],
 
     local_include_dirs: [
@@ -395,6 +396,7 @@ cc_test {
 
     cflags: common_cflags + [
         "-DJEMALLOC_INTEGRATION_TEST",
+        "-DJEMALLOC_NO_RENAME",
     ],
 
     local_include_dirs: common_c_local_includes + [
