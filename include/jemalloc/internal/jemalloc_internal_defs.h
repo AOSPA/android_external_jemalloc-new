@@ -307,12 +307,12 @@
  *                                 system overhead.
  */
 /* MADV_FREE available since kernel 4.5 but not all devices support this yet. */
-/* #undef JEMALLOC_PURGE_MADVISE_FREE */
+#define JEMALLOC_PURGE_MADVISE_FREE 
 #define JEMALLOC_PURGE_MADVISE_DONTNEED 
 #define JEMALLOC_PURGE_MADVISE_DONTNEED_ZEROS 
 
 /* Defined if madvise(2) is available but MADV_FREE is not (x86 Linux only). */
-#define JEMALLOC_DEFINE_MADVISE_FREE 
+/* #undef JEMALLOC_DEFINE_MADVISE_FREE */
 
 /*
  * Defined if MADV_DO[NT]DUMP is supported as an argument to madvise.
