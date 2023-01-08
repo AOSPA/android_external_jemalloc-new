@@ -42,6 +42,9 @@
 #define CPU_SPINWAIT __asm__ volatile("pause")
 /* 1 if CPU_SPINWAIT is defined, 0 otherwise. */
 #define HAVE_CPU_SPINWAIT 1
+#elif defined(__aarch64__)
+#define CPU_SPINWAIT __asm__ volatile("isb")
+#define HAVE_CPU_SPINWAIT 1
 #else
 #define CPU_SPINWAIT 
 /* 1 if CPU_SPINWAIT is defined, 0 otherwise. */
