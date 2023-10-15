@@ -1,4 +1,22 @@
 {
-  "comments": [],
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d3f5d221_d560cdfd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000499
+      },
+      "writtenOn": "2023-10-15T15:24:29Z",
+      "side": 1,
+      "message": "Maybe for Uvite, after kernel 4.4 is dropped?",
+      "revId": "1e37f9d062cd7927936046f377d59171a5bc79f8",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad"
+    }
+  ],
   "submitRequirementResults": []
 }
