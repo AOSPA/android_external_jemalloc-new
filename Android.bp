@@ -291,7 +291,7 @@ cc_library_host_static {
     },
 
     visibility: [
-        "//external/rust/crates/tikv-jemalloc-sys:__subpackages__",
+        "//external/rust/android-crates-io/crates/tikv-jemalloc-sys:__subpackages__",
     ],
 }
 
